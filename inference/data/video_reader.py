@@ -9,13 +9,13 @@ from PIL import Image
 import numpy as np
 
 from dataset.range_transform import im_normalization
-
+import natsort
 
 class VideoReader(Dataset):
     """
     This class is used to read a video, one frame at a time
     """
-    def __init__(self, vid_name, image_dir, mask_dir, size=-1, to_save=None, use_all_mask=False, size_dir=None):
+    def __init__(self, vid_name, image_dir, mask_dir, sort_order_asc=True ,size=-1, to_save=None, use_all_mask=False, size_dir=None):
         """
         image_dir - points to a directory of jpg images
         mask_dir - points to a directory of png masks
@@ -35,7 +35,13 @@ class VideoReader(Dataset):
         else:
             self.size_dir = size_dir
 
-        self.frames = sorted(os.listdir(self.image_dir))
+        #self.frames = sorted(os.listdir(self.image_dir)) Use natsort
+        if sort_order_asc:
+            self.frames = natsort.natsorted(os.listdir(self.image_dir))
+        
+        else:
+            self.frames = natsort.natsorted(os.listdir(self.image_dir), reverse=True)
+            
         self.palette = Image.open(path.join(mask_dir, sorted(os.listdir(mask_dir))[0])).getpalette()
         self.first_gt_path = path.join(self.mask_dir, sorted(os.listdir(self.mask_dir))[0])
 

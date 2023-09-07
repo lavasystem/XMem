@@ -6,23 +6,36 @@ from inference.data.video_reader import VideoReader
 
 
 class LongTestDataset:
-    def __init__(self, data_root, size=-1):
+    def __init__(self, data_root, sort_order_asc=True, size=-1): #sort_order_asc=True for ascending order sort_order_asc=False for descending order.
         self.image_dir = path.join(data_root, 'JPEGImages')
         self.mask_dir = path.join(data_root, 'Annotations')
         self.size = size
-
+        self.sort_order_asc = sort_order_asc
         self.vid_list = sorted(os.listdir(self.image_dir))
 
-    def get_datasets(self):
-        for video in self.vid_list:
+    def get_datasets(self,task_id=-1):        
+        if not task_id == -1:
+            video = str(task_id)
             yield VideoReader(video, 
                 path.join(self.image_dir, video), 
                 path.join(self.mask_dir, video),
                 to_save = [
                     name[:-4] for name in os.listdir(path.join(self.mask_dir, video))
                 ],
+                sort_order_asc=self.sort_order_asc,
                 size=self.size,
             )
+        else:    
+            for video in self.vid_list:
+                yield VideoReader(video, 
+                    path.join(self.image_dir, video), 
+                    path.join(self.mask_dir, video),
+                    to_save = [
+                        name[:-4] for name in os.listdir(path.join(self.mask_dir, video))
+                    ],
+                    sort_order_asc=self.sort_order_asc,
+                    size=self.size,
+                )
 
     def __len__(self):
         return len(self.vid_list)
